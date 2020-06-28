@@ -24,6 +24,22 @@ const query = require("source-server-query");
 
 ## Methods
 
+### `Constructor(localAddress)`
+
+Constructs a new instance of SourceServerQuery.
+
+**Params:**
+
+* localAddress - The local IP address that SourceServerQuery will use for its requests.
+
+**Example:**
+
+```javascript
+const SourceServerQuery = require("source-query");
+
+const currentQuery = new SourceServerQuery( '28.188.125.132' );
+```
+
 ### `info(address, <port, [timeout]>) => Promise<{}>`
 
 Returns information from an A2S_INFO query.
