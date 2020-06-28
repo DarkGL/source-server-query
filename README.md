@@ -19,7 +19,7 @@ npm i source-server-query
 and then requiring it using:
 
 ```javascript
-const query = require("source-server-query");
+const SourceServerQuery = require("source-server-query");
 ```
 
 ## Methods
