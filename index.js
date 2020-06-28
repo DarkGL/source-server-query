@@ -39,7 +39,8 @@ class SourceQuery {
 
                 let time = setTimeout( () => {
                     this.client.removeListener( 'message', response );
-                    throw new Error( 'Connection timed out.' );
+
+                    reject( 'Connection timed out.' );
                 }, timeout );
 
                 this.client.on( 'message', response );
