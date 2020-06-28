@@ -37,8 +37,11 @@ Returns information from an A2S_INFO query.
 **Example:**
 
 ```javascript
-const query = require("source-query");
-query
+const SourceServerQuery = require("source-query");
+
+const currentQuery = new SourceServerQuery();
+
+currentQuery
   .info("85.190.158.37", 27015, 2000)
   .then(console.log)
   .catch(console.log);
@@ -57,8 +60,11 @@ Returns players from an A2S_PLAYER query.
 **Example:**
 
 ```javascript
-const query = require("source-query");
-query
+const SourceServerQuery = require("source-query");
+
+const currentQuery = new SourceServerQuery();
+
+currentQuery
   .players("85.190.158.37", 27015, 2000)
   .then(console.log)
   .catch(console.log);
@@ -77,8 +83,11 @@ Returns rules from an A2S_RULES query.
 **Example:**
 
 ```javascript
-const query = require("source-query");
-query
+const SourceServerQuery = require("source-query");
+
+const currentQuery = new SourceServerQuery();
+
+currentQuery
   .rules("85.190.158.37", 27015, 2000)
   .then(console.log)
   .catch(console.log);
@@ -93,12 +102,15 @@ Closes the Dgram client in order to shutdown the program gracefully.
 **Example:**
 
 ```javascript
-const query = require("source-query");
-query
+const SourceServerQuery = require("source-query");
+
+const currentQuery = new SourceServerQuery();
+
+currentQuery
   .info("85.190.158.37", 27015)
   .then(console.log)
   .catch(console.log)
-  .then(query.close);
+  .then(currentQuery.close);
 ```
 
 ## License
