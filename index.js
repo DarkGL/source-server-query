@@ -122,8 +122,14 @@ class SourceQuery {
         let offset = 1;
         let players = [];
         let keys = [ 'index', 'name', 'score', 'duration' ];
-        for( let i = 0; i < count; i++ ) {
-            let list = bp.unpack( '<bSif', buffer, offset );
+        
+        while (offset <= buffer.byteLength) {
+            let list = bp.unpack("<bSif", buffer, offset);
+            
+            if (list === undefined) {
+                break;
+            }
+
             let player = {};
             for( let i = 0; i < list.length; i++ ) {
                 player[ keys[ i ] ] = list[ i ];
