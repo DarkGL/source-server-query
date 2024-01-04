@@ -1,18 +1,45 @@
 {
   "name": "source-server-query",
-  "version": "0.0.1",
+  "version": "3.0.3",
   "description": "Query Source game servers using the Source Query Protocol.",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "keywords": ["Steam", "Source", "Query"],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepare": "npx tsc"
+  },
+  "homepage": "https://github.com/dsyomichev/source-server-query",
+  "bugs": "https://github.com/dsyomichev/source-server-query/issuess",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsyomichev/source-server-query.git"
+  },
   "author": {
     "name": "Daniel Syomichev",
-    "email": "dsyomichev@gmail.com"
+    "email": "dsyomichev@gmail.com",
+    "url": "https://github.com/dsyomichev"
   },
-  "repository": "git@github.com:dsyomichev/SourceQuery.git",
-  "license": "MIT",
-  "private": false,
-  "dependencies": {
-    "bufferpack": "^0.0.6"
-  }
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.3",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.2",
+    "prettier": "^3.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "steam",
+    "source",
+    "query"
+  ]
 }

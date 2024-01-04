@@ -4,131 +4,57 @@ A library for querying Source servers using the [Source Query Protocol](https://
 
 ## Installing
 
-You can add this module by running:
+You can add this package to your own project using npm.
 
 ```
-yarn add source-server-query
+$ npm install source-server-query
 ```
 
-OR
+Then load it into your own project. This project includes type declarations for Typescript.
 
-```
-npm i source-server-query
+```typescript
+import query from 'source-server-query';
+
+/* OR */
+
+const query = require('source-server-query');
 ```
 
-and then requiring it using:
+Or create the object using a constructor.
+
+```typescript
+import { SourceQuerySocket } from 'source-server-query';
+
+const query: SourceQuerySocket = new SourceQuerySocket();
+
+/* OR */
+
+const { SourceQuerySocket } = require('source-server-query');
+
+const query = new SourceQuerySocket();
+```
+
+## Usage
+
+Each method, `info`, `players`, `rules`, uses the same arguments in the form of an address and port. The port is the UDP query port, not the game port. An optional timeout can be provided as well.
 
 ```javascript
-const SourceServerQuery = require("source-server-query");
+query.info('127.0.0.1', 27015, 1000).then(console.log); // A2S_INFO
+
+query.players('127.0.0.1', 27015, 1000).then(console.log); // A2S_PLAYER
+
+query.rules('127.0.0.1', 27015, 1000).then(console.log); // A2S_RULES
 ```
 
-## Methods
-
-### `Constructor(localAddress)`
-
-Constructs a new instance of SourceServerQuery.
-
-**Params:**
-
-* localAddress - The local IP address that SourceServerQuery will use for its requests.
-
-**Example:**
+The socket binding options can be configured through properties on the object, which include `port`, `address`, `exclusive`, and `fd`.
 
 ```javascript
-const SourceServerQuery = require("source-query");
-
-const currentQuery = new SourceServerQuery( '28.188.125.132' );
+socket.port = 8080;
+socket.address = '127.0.0.1';
 ```
 
-### `info(address, <port, [timeout]>) => Promise<{}>`
-
-Returns information from an A2S_INFO query.
-
-**Params:**
-
-* address - The IP address of the Source server.
-* port - The port of the Source server.
-* timeout - The timeout before an error is thrown. Defaults to 1000ms.
-
-**Example:**
-
-```javascript
-const SourceServerQuery = require("source-query");
-
-const currentQuery = new SourceServerQuery();
-
-currentQuery
-  .info("85.190.158.37", 27015, 2000)
-  .then(console.log)
-  .catch(console.log);
-```
-
-### `players(address, <port, [timeout]>) => Promise<[]>`
-
-Returns players from an A2S_PLAYER query.
-
-**Params:**
-
-* address - The IP address of the Source server.
-* port - The port of the Source server.
-* timeout - The timeout before an error is thrown. Defaults to 1000ms.
-
-**Example:**
-
-```javascript
-const SourceServerQuery = require("source-query");
-
-const currentQuery = new SourceServerQuery();
-
-currentQuery
-  .players("85.190.158.37", 27015, 2000)
-  .then(console.log)
-  .catch(console.log);
-```
-
-### `rules(address, <port, [timeout]>) => Promise<[]>`
-
-Returns rules from an A2S_RULES query.
-
-**Params:**
-
-* address - The IP address of the Source server.
-* port - The port of the Source server.
-* timeout - The timeout before an error is thrown. Defaults to 1000ms.
-
-**Example:**
-
-```javascript
-const SourceServerQuery = require("source-query");
-
-const currentQuery = new SourceServerQuery();
-
-currentQuery
-  .rules("85.190.158.37", 27015, 2000)
-  .then(console.log)
-  .catch(console.log);
-```
-
-### `destroy() => void`
-
-Closes the Dgram client in order to shutdown the program gracefully.
-
-**Params:** None
-
-**Example:**
-
-```javascript
-const SourceServerQuery = require("source-query");
-
-const currentQuery = new SourceServerQuery();
-
-currentQuery
-  .info("85.190.158.37", 27015)
-  .then(console.log)
-  .catch(console.log)
-  .then(currentQuery.close);
-```
+The socket opens and closes automatically, and whenever the socket is opened, the configuration is pushed to the socket. To force an update, close the current socket with the `close()` method. It will reopen with the updated values when the next request is sent.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
