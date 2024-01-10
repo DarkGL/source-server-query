@@ -28,68 +28,117 @@ class SourceQuerySocket {
             result.header = query.slice(offset, offset + 1);
             offset += 1;
             result.header = result.header.toString();
-            result.protocol = query.readInt8(offset);
-            offset += 1;
-            result.name = query.slice(offset, query.indexOf(0, offset));
-            offset += result.name.length + 1;
-            result.name = result.name.toString();
-            result.map = query.slice(offset, query.indexOf(0, offset));
-            offset += result.map.length + 1;
-            result.map = result.map.toString();
-            result.folder = query.slice(offset, query.indexOf(0, offset));
-            offset += result.folder.length + 1;
-            result.folder = result.folder.toString();
-            result.game = query.slice(offset, query.indexOf(0, offset));
-            offset += result.game.length + 1;
-            result.game = result.game.toString();
-            result.id = query.readInt16LE(offset);
-            offset += 2;
-            result.players = query.readInt8(offset);
-            offset += 1;
-            result.max_players = query.readInt8(offset);
-            offset += 1;
-            result.bots = query.readInt8(offset);
-            offset += 1;
-            result.server_type = query.slice(offset, offset + 1).toString();
-            offset += 1;
-            result.environment = query.slice(offset, offset + 1).toString();
-            offset += 1;
-            result.visibility = query.readInt8(offset);
-            offset += 1;
-            result.vac = query.readInt8(offset);
-            offset += 1;
-            result.version = query.slice(offset, query.indexOf(0, offset));
-            offset += result.version.length + 1;
-            result.version = result.version.toString();
-            const extra = query.slice(offset);
-            offset = 0;
-            if (extra.length < 1)
-                return result;
-            const edf = extra.readInt8(offset);
-            offset += 1;
-            if (edf & 0x80) {
-                result.port = extra.readInt16LE(offset);
+            if (result.header === 'm') {
+                // GoldSource server response parsing
+                result.address = this.readCString(query, offset);
+                offset += result.address.length + 1;
+                result.name = this.readCString(query, offset);
+                offset += result.name.length + 1;
+                result.map = this.readCString(query, offset);
+                offset += result.map.length + 1;
+                result.folder = this.readCString(query, offset);
+                offset += result.folder.length + 1;
+                result.game = this.readCString(query, offset);
+                offset += result.game.length + 1;
+                result.players = query.readInt8(offset);
+                offset += 1;
+                result.maxPlayers = query.readInt8(offset);
+                offset += 1;
+                result.protocol = query.readInt8(offset);
+                offset += 1;
+                result.serverType = String.fromCharCode(query.readInt8(offset));
+                offset += 1;
+                result.environment = String.fromCharCode(query.readInt8(offset));
+                offset += 1;
+                result.visibility = query.readInt8(offset);
+                offset += 1;
+                result.mod = query.readInt8(offset);
+                offset += 1;
+                if (result.mod === 1) {
+                    // Parse mod specific details
+                    result.modLink = this.readCString(query, offset);
+                    offset += result.modLink.length + 1;
+                    result.modDownloadLink = this.readCString(query, offset);
+                    offset += result.modDownloadLink.length + 1;
+                    offset += 1; // Skip NULL byte
+                    result.modVersion = query.readInt32LE(offset);
+                    offset += 4;
+                    result.modSize = query.readInt32LE(offset);
+                    offset += 4;
+                    result.modType = query.readInt8(offset);
+                    offset += 1;
+                    result.modDLL = query.readInt8(offset);
+                    offset += 1;
+                }
+                result.vac = query.readInt8(offset);
+                offset += 1;
+                result.bots = query.readInt8(offset);
+                offset += 1;
+            }
+            else {
+                result.protocol = query.readInt8(offset);
+                offset += 1;
+                result.name = query.slice(offset, query.indexOf(0, offset));
+                offset += result.name.length + 1;
+                result.name = result.name.toString();
+                result.map = query.slice(offset, query.indexOf(0, offset));
+                offset += result.map.length + 1;
+                result.map = result.map.toString();
+                result.folder = query.slice(offset, query.indexOf(0, offset));
+                offset += result.folder.length + 1;
+                result.folder = result.folder.toString();
+                result.game = query.slice(offset, query.indexOf(0, offset));
+                offset += result.game.length + 1;
+                result.game = result.game.toString();
+                result.id = query.readInt16LE(offset);
                 offset += 2;
-            }
-            if (edf & 0x10) {
-                result.steamid = extra.readBigUInt64LE(offset);
-                offset += 8;
-            }
-            if (edf & 0x40) {
-                result.tvport = extra.readInt16LE(offset);
-                offset += 2;
-                result.tvname = extra.slice(offset, extra.indexOf(0, offset));
-                offset += result.tvname.length + 1;
-                result.tvname = result.tvname.toString();
-            }
-            if (edf & 0x20) {
-                const keywords = extra.slice(offset, extra.indexOf(0, offset));
-                offset += keywords.length + 1;
-                result.keywords = keywords.toString();
-            }
-            if (edf & 0x01) {
-                result.gameid = extra.readBigUInt64LE(offset);
-                offset += 8;
+                result.players = query.readInt8(offset);
+                offset += 1;
+                result.max_players = query.readInt8(offset);
+                offset += 1;
+                result.bots = query.readInt8(offset);
+                offset += 1;
+                result.server_type = query.slice(offset, offset + 1).toString();
+                offset += 1;
+                result.environment = query.slice(offset, offset + 1).toString();
+                offset += 1;
+                result.visibility = query.readInt8(offset);
+                offset += 1;
+                result.vac = query.readInt8(offset);
+                offset += 1;
+                result.version = query.slice(offset, query.indexOf(0, offset));
+                offset += result.version.length + 1;
+                result.version = result.version.toString();
+                const extra = query.slice(offset);
+                offset = 0;
+                if (extra.length < 1)
+                    return result;
+                const edf = extra.readInt8(offset);
+                offset += 1;
+                if (edf & 0x80) {
+                    result.port = extra.readInt16LE(offset);
+                    offset += 2;
+                }
+                if (edf & 0x10) {
+                    result.steamid = extra.readBigUInt64LE(offset);
+                    offset += 8;
+                }
+                if (edf & 0x40) {
+                    result.tvport = extra.readInt16LE(offset);
+                    offset += 2;
+                    result.tvname = extra.slice(offset, extra.indexOf(0, offset));
+                    offset += result.tvname.length + 1;
+                    result.tvname = result.tvname.toString();
+                }
+                if (edf & 0x20) {
+                    const keywords = extra.slice(offset, extra.indexOf(0, offset));
+                    offset += keywords.length + 1;
+                    result.keywords = keywords.toString();
+                }
+                if (edf & 0x01) {
+                    result.gameid = extra.readBigUInt64LE(offset);
+                    offset += 8;
+                }
             }
             return result;
         });
@@ -248,6 +297,10 @@ class SourceQuerySocket {
             }
             return challenge;
         });
+    }
+    readCString(buffer, start) {
+        const end = buffer.indexOf(0, start);
+        return buffer.slice(start, end).toString();
     }
 }
 exports.SourceQuerySocket = SourceQuerySocket;
