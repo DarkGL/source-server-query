@@ -30,16 +30,21 @@ class SourceQuerySocket {
             result.header = result.header.toString();
             if (result.header === 'm') {
                 // GoldSource server response parsing
-                result.address = this.readCString(query, offset);
+                result.address = query.slice(offset, query.indexOf(0, offset));
                 offset += result.address.length + 1;
-                result.name = this.readCString(query, offset);
+                result.address = result.address.toString();
+                result.name = query.slice(offset, query.indexOf(0, offset));
                 offset += result.name.length + 1;
-                result.map = this.readCString(query, offset);
+                result.name = result.name.toString();
+                result.map = query.slice(offset, query.indexOf(0, offset));
                 offset += result.map.length + 1;
-                result.folder = this.readCString(query, offset);
+                result.map = result.map.toString();
+                result.folder = query.slice(offset, query.indexOf(0, offset));
                 offset += result.folder.length + 1;
-                result.game = this.readCString(query, offset);
+                result.folder = result.folder.toString();
+                result.game = query.slice(offset, query.indexOf(0, offset));
                 offset += result.game.length + 1;
+                result.game = result.game.toString();
                 result.players = query.readInt8(offset);
                 offset += 1;
                 result.maxPlayers = query.readInt8(offset);
@@ -56,10 +61,12 @@ class SourceQuerySocket {
                 offset += 1;
                 if (result.mod === 1) {
                     // Parse mod specific details
-                    result.modLink = this.readCString(query, offset);
+                    result.modLink = query.slice(offset, query.indexOf(0, offset));
                     offset += result.modLink.length + 1;
-                    result.modDownloadLink = this.readCString(query, offset);
+                    result.modLink = result.modLink.toString();
+                    result.modDownloadLink = query.slice(offset, query.indexOf(0, offset));
                     offset += result.modDownloadLink.length + 1;
+                    result.modDownloadLink = result.modDownloadLink.toString();
                     offset += 1; // Skip NULL byte
                     result.modVersion = query.readInt32LE(offset);
                     offset += 4;
@@ -291,16 +298,11 @@ class SourceQuerySocket {
             const challenge = yield this.send(einfo, request, duration);
             const type = challenge.slice(4, 5).toString();
             if (type === 'A') {
-                const challenger = challenge.readInt32LE(5);
-                const result = this.pack(header, payload, challenger);
+                const result = this.pack(header, payload, challenge.readInt32LE(5));
                 return this.send(einfo, result, duration);
             }
             return challenge;
         });
-    }
-    readCString(buffer, start) {
-        const end = buffer.indexOf(0, start);
-        return buffer.slice(start, end).toString();
     }
 }
 exports.SourceQuerySocket = SourceQuerySocket;

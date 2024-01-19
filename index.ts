@@ -108,14 +108,14 @@ export class SourceQuerySocket {
   }
 
   private pack(header: string, payload?: string, challenge?: number): Buffer {
-    const preamble: Buffer = Buffer.alloc(4);
+    const preamble = Buffer.alloc(4);
     preamble.writeInt32LE(-1, 0);
 
-    const request: Buffer = Buffer.from(header);
+    const request = Buffer.from(header);
 
-    const data: Buffer = payload ? Buffer.concat([Buffer.from(payload), Buffer.alloc(1)]) : Buffer.alloc(0);
+    const data = payload ? Buffer.concat([Buffer.from(payload), Buffer.alloc(1)]) : Buffer.alloc(0);
 
-    let prologue: Buffer = Buffer.alloc(0);
+    let prologue = Buffer.alloc(0);
     if (challenge !== undefined) {
       prologue = Buffer.alloc(4);
       prologue.writeInt32LE(challenge);
@@ -130,13 +130,12 @@ export class SourceQuerySocket {
     payload: string | undefined,
     duration: number
   ): Promise<Buffer> {
-    const request: Buffer = this.pack(header, payload);
-    const challenge: Buffer = await this.send(einfo, request, duration);
-    const type: string = challenge.slice(4, 5).toString();
+    const request = this.pack(header, payload);
+    const challenge = await this.send(einfo, request, duration);
+    const type = challenge.slice(4, 5).toString();
 
     if (type === 'A') {
-      const challenger: number = challenge.readInt32LE(5);
-      const result: Buffer = this.pack(header, payload, challenger);
+      const result = this.pack(header, payload, challenge.readInt32LE(5));
 
       return this.send(einfo, result, duration);
     }
@@ -145,7 +144,7 @@ export class SourceQuerySocket {
   }
 
   public info = async (address: string, port: number | string, timeout: number = 1000) => {
-    const query: Buffer = await this.solicit(
+    const query = await this.solicit(
       { address, port: parseInt(port as string, 10), family: '' },
       'T',
       'Source Engine Query',
@@ -161,20 +160,25 @@ export class SourceQuerySocket {
 
     if (result.header === 'm') {
       // GoldSource server response parsing
-      result.address = this.readCString(query, offset);
+      result.address = query.slice(offset, query.indexOf(0, offset));
       offset += result.address.length + 1;
+      result.address = result.address.toString();
 
-      result.name = this.readCString(query, offset);
+      result.name = query.slice(offset, query.indexOf(0, offset));
       offset += result.name.length + 1;
+      result.name = result.name.toString();
 
-      result.map = this.readCString(query, offset);
+      result.map = query.slice(offset, query.indexOf(0, offset));
       offset += result.map.length + 1;
+      result.map = result.map.toString();
 
-      result.folder = this.readCString(query, offset);
+      result.folder = query.slice(offset, query.indexOf(0, offset));
       offset += result.folder.length + 1;
+      result.folder = result.folder.toString();
 
-      result.game = this.readCString(query, offset);
+      result.game = query.slice(offset, query.indexOf(0, offset));
       offset += result.game.length + 1;
+      result.game = result.game.toString();
 
       result.players = query.readInt8(offset);
       offset += 1;
@@ -199,11 +203,13 @@ export class SourceQuerySocket {
 
       if (result.mod === 1) {
         // Parse mod specific details
-        result.modLink = this.readCString(query, offset);
+        result.modLink = query.slice(offset, query.indexOf(0, offset));
         offset += result.modLink.length + 1;
+        result.modLink = result.modLink.toString();
 
-        result.modDownloadLink = this.readCString(query, offset);
+        result.modDownloadLink = query.slice(offset, query.indexOf(0, offset));
         offset += result.modDownloadLink.length + 1;
+        result.modDownloadLink = result.modDownloadLink.toString();
 
         offset += 1; // Skip NULL byte
 
@@ -273,12 +279,12 @@ export class SourceQuerySocket {
       offset += result.version.length + 1;
       result.version = result.version.toString();
 
-      const extra: Buffer = query.slice(offset);
+      const extra = query.slice(offset);
 
       offset = 0;
       if (extra.length < 1) return result;
 
-      const edf: number = extra.readInt8(offset);
+      const edf = extra.readInt8(offset);
       offset += 1;
 
       if (edf & 0x80) {
@@ -301,7 +307,7 @@ export class SourceQuerySocket {
       }
 
       if (edf & 0x20) {
-        const keywords: Buffer = extra.slice(offset, extra.indexOf(0, offset));
+        const keywords = extra.slice(offset, extra.indexOf(0, offset));
         offset += keywords.length + 1;
 
         result.keywords = keywords.toString();
@@ -317,7 +323,7 @@ export class SourceQuerySocket {
   };
 
   public players = async (address: string, port: number | string, timeout: number = 1000) => {
-    const query: Buffer = await this.solicit(
+    const query = await this.solicit(
       { address, port: parseInt(port as string, 10), family: '' },
       'U',
       undefined,
@@ -325,7 +331,7 @@ export class SourceQuerySocket {
     );
 
     let offset = 5;
-    const count: number = query.readInt8(offset);
+    const count = query.readInt8(offset);
     offset += 1;
 
     const result: Record<string, string | number>[] = [];
@@ -352,7 +358,7 @@ export class SourceQuerySocket {
   };
 
   public rules = async (address: string, port: string | number, timeout = 1000) => {
-    const query: Buffer = await this.solicit(
+    const query = await this.solicit(
       { address, port: parseInt(port as string, 10), family: '' },
       'V',
       undefined,
@@ -360,13 +366,13 @@ export class SourceQuerySocket {
     );
 
     let offset = 0;
-    const header: number = query.readInt32LE(offset);
+    const header = query.readInt32LE(offset);
     if (header === -2) throw new Error('Unsupported response received.');
     offset += 4;
 
     offset += 1;
 
-    const count: number = query.readInt16LE(offset);
+    const count = query.readInt16LE(offset);
     offset += 2;
 
     const result: Record<string, string>[] = [];
@@ -386,11 +392,6 @@ export class SourceQuerySocket {
 
     return result;
   };
-
-  private readCString(buffer: Buffer, start: number) {
-    const end = buffer.indexOf(0, start);
-    return buffer.slice(start, end).toString();
-  }
 }
 
 export default new SourceQuerySocket();
